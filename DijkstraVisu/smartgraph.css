@@ -84,14 +84,14 @@ This should help you understand which styles you can apply.
     -fx-stroke-width: 3;
     -fx-stroke: green;
     -fx-stroke-type: inside; /* you should keep this if using arrows */
-    -fx-fill: green;
+    -fx-fill: limegreen;
 }
 
 .endVertex{
     -fx-stroke-width: 3;
     -fx-stroke: red;
     -fx-stroke-type: inside; /* you should keep this if using arrows */
-    -fx-fill: black;
+    -fx-fill: #FF6961;
 }
 
 /* Custom edge class. The same above logic applies to edges.

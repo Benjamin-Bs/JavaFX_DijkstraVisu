@@ -12,6 +12,7 @@ import javafx.scene.control.ToolBar;
 import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.layout.BorderPane;
 
+import java.util.List;
 import java.util.function.Consumer;
 
 public class GraphView extends BorderPane {
@@ -21,6 +22,12 @@ public class GraphView extends BorderPane {
     private GraphControl graphControl;
     private VertexData startVertex;
     private VertexData endVertex;
+
+    // Koordinaten
+    private double lastContextScreenX;
+    private double lastContextScreenY;
+
+    private SmartGraphVertexNode<VertexData> lastSelectedVertex;
 
     public GraphView(GraphControl graphControl) {
         super();
@@ -56,13 +63,21 @@ public class GraphView extends BorderPane {
         // Enable Context on Vertex
         ContextMenu contextMenu = buildContextMenu();
 
-        // TODO: das auf meiner Menü ändern
+
         smartGraphPanel.setOnContextMenuRequested(new EventHandler<ContextMenuEvent>() {
             @Override
             public void handle(ContextMenuEvent event) {
                 System.out.println("ContextMenuEvent: " + event);
 
+                lastContextScreenX = event.getScreenX();
+                lastContextScreenY = event.getScreenY();
+
+//                System.out.println("lastContextScreenX: " + lastContextScreenX);
+//                System.out.println("lastContextScreenY: " + lastContextScreenY);
+
                 SmartGraphVertexNode<VertexData> foundVertex = findVertex(event.getX(), event.getY());
+                lastSelectedVertex = foundVertex;
+
                 if (foundVertex != null) {
                     contextMenu.show(foundVertex, event.getScreenX(), event.getScreenY());
                 }
@@ -82,27 +97,29 @@ public class GraphView extends BorderPane {
     private ContextMenu buildContextMenu() {
         ContextMenu contextMenu = new ContextMenu();
 
-        MenuItem selectStart = new MenuItem("Select as Start");
+        MenuItem selectStart = new MenuItem("Start Vertex");
         selectStart.setOnAction(event -> {
+            if (lastSelectedVertex != null) {
+                startVertex = lastSelectedVertex.getUnderlyingVertex().element();
+                System.out.println("startVertex: " + startVertex);
 
-            double x = contextMenu.getScene().getWindow().getX();
-            double y = contextMenu.getScene().getWindow().getY();
+                lastSelectedVertex.setStyleClass("startVertex");
 
-            SmartGraphVertexNode<VertexData> selectedVertex = findVertex(x, y);
-            if (selectedVertex != null) {
-                startVertex = selectedVertex.getUnderlyingVertex().element();
-                System.out.println("StartVertex: " + startVertex);
+            } else {
+                System.out.println("no startVertex selected");
             }
         });
+
         MenuItem selectEnd = new MenuItem("Select as End");
         selectEnd.setOnAction(event -> {
-            double x = contextMenu.getScene().getWindow().getX();
-            double y = contextMenu.getScene().getWindow().getY();
-
-            SmartGraphVertexNode<VertexData> selectedVertex = findVertex(x, y);
-            if (selectedVertex != null) {
-                endVertex = selectedVertex.getUnderlyingVertex().element();
+            if (lastSelectedVertex != null) {
+                endVertex = lastSelectedVertex.getUnderlyingVertex().element();
                 System.out.println("endVertex: " + endVertex);
+
+                lastSelectedVertex.setStyleClass("endVertex");
+
+            } else {
+                System.out.println("No endVertex selected");
             }
         });
         contextMenu.getItems().add(selectStart);
@@ -135,7 +152,23 @@ public class GraphView extends BorderPane {
     private class DijkstraEventHandler implements EventHandler<ActionEvent> {
         @Override
         public void handle(ActionEvent actionEvent) {
-            System.out.println("Hallo Dijkstra");
+
+            System.out.println("startVertex: " + startVertex);
+            System.out.println("endVertex: " + endVertex);
+
+            if (startVertex == null || endVertex == null) {
+                System.out.println("startVertex or endVertex is null");
+                return;
+            }
+
+            List<VertexData> path = graphControl.shortestPath(startVertex, endVertex);
+
+            if (path.isEmpty()) {
+                System.out.println("No path between " + startVertex + " and " + endVertex + " found");
+            } else {
+                System.out.println("shortestPath: " + path);
+            }
+
         }
     }
 

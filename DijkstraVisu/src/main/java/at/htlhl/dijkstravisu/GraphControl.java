@@ -71,74 +71,85 @@ public class GraphControl {
 
     public List<VertexData> shortestPath(VertexData startVertex, VertexData endVertex) {
 
+        // Initialisieren von Distanzen und Vorgängern
         Map<Vertex<VertexData>, Integer> distances = new HashMap<>();
         Map<Vertex<VertexData>, Vertex<VertexData>> predecessors = new HashMap<>();
+        List<Vertex<VertexData>> unvisited = new ArrayList<>(graph.vertices());
 
-        ArrayList<Vertex<VertexData>> unvisited = new ArrayList<>();
-
-        // Distance und alle Vertexes in unprocessed stecken
-        for(Vertex<VertexData> vertex: graph.vertices()) {
-            distances.put(vertex, Integer.MAX_VALUE);
-            predecessors.put(vertex, null);
-            unvisited.add(vertex);
-        }
-
+        // Start- und Endknoten finden
         Vertex<VertexData> start = findVertex(startVertex);
         Vertex<VertexData> end = findVertex(endVertex);
 
-        // Start Vertex distance auf 0 setzen
-        distances.put(start, 0);
+        // Distanzen initialisieren
+        for (Vertex<VertexData> vertex : graph.vertices()) {
+            distances.put(vertex, Integer.MAX_VALUE); // Unendlich für alle außer Start
+            predecessors.put(vertex, null);
+        }
+
+        distances.put(start, 0); // Startknoten hat Distanz 0
 
         while (!unvisited.isEmpty()) {
+            // Nächsten Knoten mit der kleinsten Distanz finden
             Vertex<VertexData> currentVertex = getMinVertexDistance(unvisited, distances);
 
-            // Soll die current von den unvisited entfernen
-            unvisited.remove(currentVertex);
+            // Wenn kein erreichbarer Knoten übrig ist, abbrechen
+            if (currentVertex == null) {
+                break;
+            }
 
-            // Wenn Ende erreicht wurde
+            unvisited.remove(currentVertex); // Knoten aus unbesuchten entfernen
+
+            // Wenn wir den Endknoten erreichen, beenden
             if (currentVertex.equals(end)) {
                 break;
             }
 
-            for(Edge<EdgeData, VertexData> edge: graph.incidentEdges(currentVertex)){
-                Vertex<VertexData> neighor = graph.opposite(currentVertex, edge);
+            // Alle Nachbarn des aktuellen Knotens verarbeiten
+            for (Edge<EdgeData, VertexData> edge : graph.incidentEdges(currentVertex)) {
+                Vertex<VertexData> neighbor = graph.opposite(currentVertex, edge);
 
-                // überspringen von beareiteten Knoten
-                if (distances.containsKey(neighor)) {
+                // Falls der Nachbar bereits besucht wurde, überspringen
+                if (!unvisited.contains(neighbor)) {
                     continue;
                 }
 
+                // Neue Distanz berechnen
                 int newDistance = distances.get(currentVertex) + edge.element().getDistance();
-                if (newDistance < distances.get(neighor)) {
-                    distances.put(neighor, newDistance);
-                    predecessors.put(neighor, currentVertex);
+                if (newDistance < distances.get(neighbor)) {
+                    distances.put(neighbor, newDistance); // Aktualisiere die Distanz
+                    predecessors.put(neighbor, currentVertex); // Vorgänger setzen
                 }
             }
         }
 
+        // Pfad anhand der Vorgänger rekonstruieren
         List<VertexData> path = new ArrayList<>();
-        for (Vertex<VertexData> i = end; i != null ; i = predecessors.get(i)) {
-            path.add(i.element());
+        for (Vertex<VertexData> at = end; at != null; at = predecessors.get(at)) {
+            path.add(at.element());
         }
 
-        Collections.reverse(path);
+        Collections.reverse(path); // Pfad umkehren, da von Endknoten rückwärts aufgebaut
 
-        if (path.isEmpty() || !path.get(0).equals(start)) {
-            return Collections.emptyList();
-        }else {
-            return path;
+        // Überprüfen, ob der Startknoten tatsächlich im Pfad ist
+        if (path.isEmpty() || !path.get(0).equals(startVertex)) {
+            return Collections.emptyList(); // Kein gültiger Pfad gefunden
         }
+
+        return path;
     }
 
     private Vertex<VertexData> findVertex(VertexData vertex) {
-        return graph.vertices().stream().filter(v -> v.equals(vertex)).findFirst().get();
+        return graph.vertices().stream()
+                .filter(v -> v.element().equals(vertex))
+                .findFirst()
+                .orElseThrow(() -> new NoSuchElementException("Knoten " + vertex + " nicht im Graphen gefunden"));
     }
 
     private Vertex<VertexData> getMinVertexDistance(List<Vertex<VertexData>> vertices, Map<Vertex<VertexData>, Integer> distances) {
         Vertex<VertexData> minVertex = null;
         int minDistance = Integer.MAX_VALUE;
 
-        for (Vertex<VertexData> vertex: vertices) {
+        for (Vertex<VertexData> vertex : vertices) {
             int distance = distances.get(vertex);
             if (distance < minDistance) {
                 minDistance = distance;
