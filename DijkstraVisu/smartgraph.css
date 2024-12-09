@@ -102,3 +102,14 @@ This should help you understand which styles you can apply.
     -fx-opacity: 1;
     -fx-fill: transparent; /* important to keep for curved edges */
 }
+
+.highlight-vertex {
+    -fx-fill: gold;
+    -fx-stroke: black;
+    -fx-stroke-width: 2px;
+}
+
+.highlight-edge {
+    -fx-stroke: gold;
+    -fx-stroke-width: 3px;
+}

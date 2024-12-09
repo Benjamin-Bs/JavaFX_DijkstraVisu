@@ -99,7 +99,7 @@ public class GraphControl {
 
             unvisited.remove(currentVertex); // Knoten aus unbesuchten entfernen
 
-            // Wenn wir den Endknoten erreichen, beenden
+            // Wenn Endknoten erreicht, beenden
             if (currentVertex.equals(end)) {
                 break;
             }
@@ -138,11 +138,28 @@ public class GraphControl {
         return path;
     }
 
-    private Vertex<VertexData> findVertex(VertexData vertex) {
+    public Vertex<VertexData> findVertex(VertexData vertex) {
         return graph.vertices().stream()
                 .filter(v -> v.element().equals(vertex))
                 .findFirst()
                 .orElseThrow(() -> new NoSuchElementException("Knoten " + vertex + " nicht im Graphen gefunden"));
+    }
+
+    public Edge<EdgeData, VertexData> findEdge(VertexData startVertex, VertexData endVertex) {
+        for (Edge<EdgeData, VertexData> edge : graph.edges()) {
+            Vertex<VertexData>[] vertices = edge.vertices();
+            Vertex<VertexData> start = vertices[0];
+            Vertex<VertexData> end = vertices[1];
+
+            if (start.element().equals(startVertex) && end.element().equals(endVertex)) {
+                return edge;
+            }
+
+            if (end.element().equals(startVertex) && start.element().equals(endVertex)) {
+                return edge;
+            }
+        }
+        return null;
     }
 
     private Vertex<VertexData> getMinVertexDistance(List<Vertex<VertexData>> vertices, Map<Vertex<VertexData>, Integer> distances) {
