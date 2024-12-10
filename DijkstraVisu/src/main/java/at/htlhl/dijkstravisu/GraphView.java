@@ -268,20 +268,6 @@ public class GraphView extends BorderPane {
         @Override
         public void handle(ActionEvent actionEvent) {
 
-            if (startVertex != null) {
-                SmartStylableNode startNode = smartGraphPanel.getStylableVertex(graphControl.findVertex(startVertex));
-                if (startNode != null) {
-                    startNode.setStyleClass("vertex");
-                }
-            }
-
-            if (endVertex != null) {
-                SmartStylableNode endNode = smartGraphPanel.getStylableVertex(graphControl.findVertex(endVertex));
-                if (endNode != null) {
-                    endNode.setStyleClass("vertex");
-                }
-            }
-
             startVertex = null;
             endVertex = null;
 
@@ -292,6 +278,12 @@ public class GraphView extends BorderPane {
                 }
             });
 
+            graphControl.getGraph().vertices().forEach(vertex ->{
+                SmartStylableNode vertexNode = smartGraphPanel.getStylableVertex(vertex.element());
+                if (vertexNode != null) {
+                    vertexNode.setStyleClass("vertex");
+                }
+            });
 
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("Clear");
