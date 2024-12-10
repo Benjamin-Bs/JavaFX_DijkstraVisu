@@ -176,6 +176,21 @@ public class GraphControl {
         return minVertex;
     }
 
+    public EdgeData getEdge(VertexData from, VertexData to) {
+        for (Edge<EdgeData, VertexData> edge : graph.edges()) {
+            Vertex<VertexData>[] vertices = edge.vertices(); // Hole die beiden Knoten der Kante
+            Vertex<VertexData> start = vertices[0];
+            Vertex<VertexData> end = vertices[1];
+
+            // Prüfen, ob die Kante die beiden Knoten verbindet (in beide Richtungen)
+            if ((start.element().equals(from) && end.element().equals(to)) ||
+                    (start.element().equals(to) && end.element().equals(from))) {
+                return edge.element(); // Rückgabe der Kanten-Daten
+            }
+        }
+        return null;
+    }
+
     public Graph<VertexData, EdgeData> getGraph() {
         return graph;
     }

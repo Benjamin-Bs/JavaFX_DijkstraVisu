@@ -199,6 +199,18 @@ public class GraphView extends BorderPane {
             } else {
                 System.out.println("shortestPath: " + path);
 
+                double totalDistance = 0;
+                for (int i = 0; i < path.size() - 1; i++) {
+                    VertexData current = path.get(i);
+                    VertexData next = path.get(i + 1);
+                    // Hole die Kante und addiere deren Distanz
+                    EdgeData edge = graphControl.getEdge(current, next);
+                    if (edge != null) {
+                        totalDistance += edge.getDistance(); // Kanten-Distanz zu den Gesamtkosten addieren
+                    }
+                }
+                System.out.println("Total Distance: " + totalDistance + " km");
+
                 // Format path as a string
                 StringBuilder pathString = new StringBuilder();
                 for (VertexData vertex : path) {
@@ -215,7 +227,7 @@ public class GraphView extends BorderPane {
                 Alert alert = new Alert(Alert.AlertType.INFORMATION);
                 alert.setTitle("Shortest Path Found");
                 alert.setHeaderText("Shortest Path from " + startVertex.getName() + " to " + endVertex.getName());
-                alert.setContentText("Path: " + pathString.toString());
+                alert.setContentText("Path: " + pathString.toString() + "\nTotal Distance: " + totalDistance + " km\n\nClick OK to continue.");
                 alert.showAndWait();
 
             }
@@ -278,7 +290,7 @@ public class GraphView extends BorderPane {
                 }
             });
 
-            graphControl.getGraph().vertices().forEach(vertex ->{
+            graphControl.getGraph().vertices().forEach(vertex -> {
                 SmartStylableNode vertexNode = smartGraphPanel.getStylableVertex(vertex.element());
                 if (vertexNode != null) {
                     vertexNode.setStyleClass("vertex");
